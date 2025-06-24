@@ -1,28 +1,15 @@
-void RenderScene() {
-   auto canvas = dynamic_cast<TCanvas*>(object);
-   if (!canvas) {
-      printf("Object is not a TCanvas!\n");
-      return;
+// Return the canvas to JSROOT
+gROOT->SetSpecialObject(canvas);
+}
+   for (int i = 0; i < 415; ++i) {
+      TString name = TString::Format("polyline_%d", i);
+      auto obj = (TPolyLine3D*)gFile->Get(name);
+      if (obj)
+         gEve->AddElement(obj);
    }
 
-   // Ensure pad and view are active
-   canvas->cd();
-   gPad->Modified();
-   gPad->Update();
-
-   // Optionally: print all primitives
-   TIter next(gPad->GetListOfPrimitives());
-   TObject* obj;
-   while ((obj = next())) {
-      printf("Found: %s (%s)\n", obj->GetName(), obj->ClassName());
-
-      // If it's a polyline, we can configure it
-      if (obj->InheritsFrom("TPolyLine3D")) {
-         auto line = (TPolyLine3D*)obj;
-         line->SetLineColor(kRed); // Or whatever you like
-      }
-   }
-
-   // Return the canvas to JSROOT
-   gROOT->SetSpecialObject(canvas);
+   // Optional: Also add the volume if it exists
+   auto vol = gFile->Get("Wolrd Volume");
+   if (vol)
+      gEve->AddElement((TEveElement*)vol);
 }
