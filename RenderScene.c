@@ -1,28 +1,28 @@
-void RenderScene()
-{
-   // 'object' is the top-level object passed from JSROOT (e.g. 3DPlot)
-   auto list = dynamic_cast<TEveElement*>(object);
-   if (!list) {
-      //printf("Object is not a TEveElement\n");
+void RenderScene() {
+   auto canvas = dynamic_cast<TCanvas*>(object);
+   if (!canvas) {
+      printf("Object is not a TCanvas!\n");
       return;
    }
 
-   list->SetRnrSelf(kTRUE);
-   list->SetRnrChildren(kTRUE);
+   // Ensure pad and view are active
+   canvas->cd();
+   gPad->Modified();
+   gPad->Update();
 
-   // Go over all children and activate them
-   TIter next(list->GetListChildren());
+   // Optionally: print all primitives
+   TIter next(gPad->GetListOfPrimitives());
    TObject* obj;
    while ((obj = next())) {
-      auto eve = dynamic_cast<TEveElement*>(obj);
-      if (eve) {
-         eve->SetRnrSelf(kTRUE);
-         eve->SetRnrChildren(kTRUE);
-         // Optional: Set color or style here
+      printf("Found: %s (%s)\n", obj->GetName(), obj->ClassName());
+
+      // If it's a polyline, we can configure it
+      if (obj->InheritsFrom("TPolyLine3D")) {
+         auto line = (TPolyLine3D*)obj;
+         line->SetLineColor(kRed); // Or whatever you like
       }
    }
 
-   // Return list to JSROOT
-   gROOT->SetSpecialObject(list);
+   // Return the canvas to JSROOT
+   gROOT->SetSpecialObject(canvas);
 }
-
